@@ -17,47 +17,50 @@ app = Flask(__name__)
 @app.route('/submit/<module>/<url_number>/<file_name>/<file_size>/<expiration>/', methods=["POST", "GET"])
 def submit(module=None,url_number=None,file_name=None,file_size=None, expiration=None):
     # /submit  rendered page to give an overview
-    basic_usage= """<pre>
-                                        \t\t\t-----Basic user information-----\n\n
-                                \t\t\t-- ipaddr:5000/ and ipaddr:5000/submit will show this message--\n\n
-                   \t\t\t -- ipaddr:5000/display/module to display all of the entries from that module --        
-                                     \t \t\tAvailable modules: [ gofile, upfile]
-
-
-                                   \t \t\t\t\t-|Upfile.io|-\n
-
-                http://ipaddr:5000/submit/upfile/123456/   ---- Bare minimum request. ipaddr:5000/submit/module_name/character string made with url_gen | Upfile.io service
-                http://ipaddr:5000/submit/upfile/123456/test.txt/  ----Bare minimum plus file_name
-                http://ipaddr:5000/submit/upfile/123456/test.txt/3mb/ ----Bare minimum plus file_name, and file_size
-                http://ipaddr:5000/submit/upfile/123456/test.txt/3mb/4-20-1922 ----full request - has module,string found with urlgen, filename,filesize, and expiration date
-                      
-                                    \t\t\t\t\t-|Gofile.io|-\n
-
-                http://ipaddr:5000/submit/gofile/123456/  ---Bare minimum request. ipaddr:5000/submit/module_name/character string made with url_gen 
-                http://ipaddr:5000/submit/gofile/123456/test.txt/   Bare minimum plus file name
-                http://ipaddr:5000/submit/gofile/123456/test.txt/3mb/ Bare minimum plus file name, and file size
-                http://ipaddr:5000/submit/gofile/123456/test.txt/3mb/4-20-1922 full request - has module,string found with urlgen, filename,filesize, expiration date
-            
-                Note: This allows you to update the entry once its already been added.
-                        ex. http://ipaddr:5000/submit/gofile/123456/    This adds 123456 entry in the gofile part of the structure. 
-                        ex  http://ipaddr:5000/submit/gofile/123456/file_name.iso/700mb/3-29-2019  This appends the filename and the file size to the already entered item
-                </pre>    """
-    
-    # Our data loaded from JSON
-    data = load_json()
     base_path = request.url_rule
+    if check_url_string(url_number) == True:
+        basic_usage= """<pre>
+                                            \t\t\t-----Basic user information-----\n\n
+                                    \t\t\t-- ipaddr:5000/ and ipaddr:5000/submit will show this message--\n\n
+                    \t\t\t -- ipaddr:5000/display/module to display all of the entries from that module --        
+                                        \t \t\tAvailable modules: [ gofile, upfile]
 
-    #If its just a base /submit , then it will return the message explaining the format
-    if module ==None and url_number == None and file_name==None and file_size==None and expiration==None and '/' in base_path.rule:
-        return Markup("{}".format(basic_usage))
 
-    #If at least the base required entries for submission are present... add to file and return the information written
-    elif module!=None and url_number !=None:
-        modules = {"upfile":"https://uploadfiles.io/{}".format(url_number), "gofile":"https://gofile.io/?c={}".format(url_number)}
-        data['modules'][module][url_number] = {"url":modules[module],"file_name":file_name, "file_size":file_size, "expiration": expiration}
-        write_json(data)
-        print("Module: {} Url: {} file_name: {} file_size:{} expiration:{}".format(module,modules[module],file_name,file_size,expiration))
-        return "<b>Module:</b> {} <b>Url:</b> {} <b>file_name:</b> {} <b>file_size:</b> {} <b>expiration:</b> {}".format(module,modules[module],file_name,file_size,expiration)
+                                    \t \t\t\t\t-|Upfile.io|-\n
+
+                    http://ipaddr:5000/submit/upfile/123456/   ---- Bare minimum request. ipaddr:5000/submit/module_name/character string made with url_gen | Upfile.io service
+                    http://ipaddr:5000/submit/upfile/123456/test.txt/  ----Bare minimum plus file_name
+                    http://ipaddr:5000/submit/upfile/123456/test.txt/3mb/ ----Bare minimum plus file_name, and file_size
+                    http://ipaddr:5000/submit/upfile/123456/test.txt/3mb/4-20-1922 ----full request - has module,string found with urlgen, filename,filesize, and expiration date
+                        
+                                        \t\t\t\t\t-|Gofile.io|-\n
+
+                    http://ipaddr:5000/submit/gofile/123456/  ---Bare minimum request. ipaddr:5000/submit/module_name/character string made with url_gen 
+                    http://ipaddr:5000/submit/gofile/123456/test.txt/   Bare minimum plus file name
+                    http://ipaddr:5000/submit/gofile/123456/test.txt/3mb/ Bare minimum plus file name, and file size
+                    http://ipaddr:5000/submit/gofile/123456/test.txt/3mb/4-20-1922 full request - has module,string found with urlgen, filename,filesize, expiration date
+                
+                    Note: This allows you to update the entry once its already been added.
+                            ex. http://ipaddr:5000/submit/gofile/123456/    This adds 123456 entry in the gofile part of the structure. 
+                            ex  http://ipaddr:5000/submit/gofile/123456/file_name.iso/700mb/3-29-2019  This appends the filename and the file size to the already entered item
+                    </pre>    """
+        
+        # Our data loaded from JSON
+        data = load_json()
+
+        #If its just a base /submit , then it will return the message explaining the format
+        if module ==None and url_number == None and file_name==None and file_size==None and expiration==None and '/' in base_path.rule:
+            return Markup("{}".format(basic_usage))
+
+        #If at least the base required entries for submission are present... add to file and return the information written
+        elif module!=None and url_number !=None:
+            modules = {"upfile":"https://uploadfiles.io/{}".format(url_number), "gofile":"https://gofile.io/?c={}".format(url_number)}
+            data['modules'][module][url_number] = {"url":modules[module],"file_name":file_name, "file_size":file_size, "expiration": expiration}
+            write_json(data)
+            print("Module: {} Url: {} file_name: {} file_size:{} expiration:{}".format(module,modules[module],file_name,file_size,expiration))
+            return "<b>Module:</b> {} <b>Url:</b> {} <b>file_name:</b> {} <b>file_size:</b> {} <b>expiration:</b> {}".format(module,modules[module],file_name,file_size,expiration)
+    else:
+        return('Invalid character string for url type')
 
 def load_json():
     """Loads JSON structure from database/files.json. If files.json isnt found, initialize it with our module names as ('modules':{"module1":{},"module2":{}}}"""
@@ -76,14 +79,29 @@ def load_json():
 
 def write_json(json_object):
     """Writes JSON object to the files.json database"""
-    with open('database/files.json', "r+") as json_file:
+    with open('database/files.json', "w") as json_file:
         json.dump(json_object, json_file)
     print("[+] File Added ")
 
-@app.route('/delete/<module>/<url_number>/',methods=['POST','GET'])
-def delete(module,url_number):
-    #THIS STILL NEEDS WRITTEN                                      <-----------------
-    return Markup("<h4> THis is delete page</h4>")
+def check_url_string(string):
+    if string == None:
+        return True
+    elif string.isalnum() == True:
+        return True
+    else:
+        return False
+
+@app.route('/delete/<module>/<char_string>/',methods=['POST','GET'])
+def delete(module,char_string):
+    try:
+        json_data = load_json()
+        return_message = "Deleted {} ".format(json_data['modules'][module][char_string]['file_name'])
+        if module in json_data['modules']:
+                del json_data['modules'][module][char_string]
+                write_json(json_data)
+    except:
+        return('Entry not found')
+    return Markup(return_message)
 
 @app.route('/display/<module>/', methods=["POST","GET"])
 def display(module):
@@ -95,6 +113,7 @@ def display(module):
     for result in results:
         return_string += result
     return Markup(return_string)
+
 
 
 if __name__ == "__main__":
