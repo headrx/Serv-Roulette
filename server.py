@@ -123,14 +123,21 @@ def random_file(module=None):
     """Return JSON string of random file"""
     json_data = load_json()
     files = list()
-    
-    modules = ["upfile","gofile"]
-    module = random.choice(modules)
-    
-    for file in json_data['modules'][module].keys():
-        files.append(file)
-    random_file = random.choice(files)
-    return Markup("<h4> {} </h4>".format("{}".format(json_data['modules'][module][random_file])))
+
+    if module == None:
+        modules = ["upfile","gofile"]
+        module = random.choice(modules)
+        
+        for file in json_data['modules'][module].keys():
+            files.append(file)
+        random_file = random.choice(files)
+        return Markup("<h4> {} </h4>".format("{}".format(json_data['modules'][module][random_file])))
+        
+    elif module !=None:
+        for file in json_data['modules'][module].keys():
+            files.append(file)
+        random_file = random.choice(files)
+        return Markup("<h4> {} </h4>".format("{}".format(json_data['modules'][module][random_file])))
 
 if __name__ == "__main__":
     app.run()
