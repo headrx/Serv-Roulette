@@ -1,6 +1,7 @@
 
 import os
 import json
+import random
 from flask import Flask, render_template, Markup, redirect, request
 
 app = Flask(__name__)
@@ -16,7 +17,7 @@ app = Flask(__name__)
 @app.route('/submit/<module>/<url_number>/<file_name>/<file_size>/', methods=['POST','GET'])
 @app.route('/submit/<module>/<url_number>/<file_name>/<file_size>/<expiration>/', methods=["POST", "GET"])
 def submit(module=None,url_number=None,file_name=None,file_size=None, expiration=None):
-    # /submit  rendered page to give an overview
+    """ Submit/edit a file"""
     base_path = request.url_rule
     if check_url_string(url_number) == True:
         basic_usage= """<pre>
@@ -93,6 +94,7 @@ def check_url_string(string):
 
 @app.route('/delete/<module>/<char_string>/',methods=['POST','GET'])
 def delete(module,char_string):
+    """Delete file entry by char string"""
     try:
         json_data = load_json()
         return_message = "Deleted {} ".format(json_data['modules'][module][char_string]['file_name'])
@@ -112,9 +114,23 @@ def display(module):
     return_string = ""
     for result in results:
         return_string += result
+    if len(return_string) < 1:
+        return Markup("<p>Module {} is empty".format(module))
     return Markup(return_string)
-
-
+@app.route('/random/', methods=["GET","POST"])
+@app.route("/random/<module>", methods=["GET","POST"])
+def random_file(module=None):
+    """Return JSON string of random file"""
+    json_data = load_json()
+    files = list()
+    
+    modules = ["upfile","gofile"]
+    module = random.choice(modules)
+    
+    for file in json_data['modules'][module].keys():
+        files.append(file)
+    random_file = random.choice(files)
+    return Markup("<h4> {} </h4>".format("{}".format(json_data['modules'][module][random_file])))
 
 if __name__ == "__main__":
     app.run()
