@@ -23,7 +23,9 @@ def submit(module=None,url_number=None,file_name=None,file_size=None, expiration
         basic_usage= """<pre>
                                             \t\t\t-----Basic user information-----\n\n
                                     \t\t\t-- ipaddr:5000/ and ipaddr:5000/submit will show this message--\n\n
-                    \t\t\t -- ipaddr:5000/display/module to display all of the entries from that module --        
+                    \t\t\t -- ipaddr:5000/display/module to display all of the entries from that module --
+                    \t\t\t -- ipaddr:5000/random to display a random entry from random module
+                    \t\t\t -- ipaddr:5000/random/module_name to display random entry from selected module        
                                         \t \t\tAvailable modules: [ gofile, upfile]
 
 
@@ -117,13 +119,16 @@ def display(module):
     if len(return_string) < 1:
         return Markup("<p>Module {} is empty".format(module))
     return Markup(return_string)
+
+
 @app.route('/random/', methods=["GET","POST"])
 @app.route("/random/<module>", methods=["GET","POST"])
 def random_file(module=None):
     """Return JSON string of random file"""
     json_data = load_json()
     files = list()
-
+    
+    # If a module wasn't specified
     if module == None:
         modules = ["upfile","gofile"]
         module = random.choice(modules)
@@ -132,7 +137,8 @@ def random_file(module=None):
             files.append(file)
         random_file = random.choice(files)
         return Markup("<h4> {} </h4>".format("{}".format(json_data['modules'][module][random_file])))
-        
+
+    # If a module IS specified    
     elif module !=None:
         for file in json_data['modules'][module].keys():
             files.append(file)
